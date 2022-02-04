@@ -21,5 +21,6 @@ module.exports = (sequelize,DataTypes)=>{
         createdAt:'create_at',
         updatedAt:'modified_at',
         // engine:'MYISAM'
-    })
+    });
+    return Users;
 }

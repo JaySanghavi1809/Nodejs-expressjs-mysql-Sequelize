@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 8080;
+const port = 3000;
 const model = require('./models')
 var userCtrl = require('./controllers/userController')
 
@@ -9,6 +9,8 @@ app.get('/',(req,res)=>{
 });
 
 app.get('/add',userCtrl.addUser)
+app.get('/CRUD',userCtrl.crudOperation)
+app.get('/query',userCtrl.queryData)
 
 app.listen(port,()=>{
     console.log(`App is listening at http://localhost:${port}`)

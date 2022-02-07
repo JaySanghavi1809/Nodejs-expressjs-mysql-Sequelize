@@ -10,7 +10,13 @@ app.get('/',(req,res)=>{
 
 app.get('/add',userCtrl.addUser)
 app.get('/CRUD',userCtrl.crudOperation)
+
 app.get('/query',userCtrl.queryData)
+app.get('/finder',userCtrl.finderData)
+
+app.get('/setter-getter',userCtrl.setterGetter);
+app.get('/validation',userCtrl.validationCont);
+app.get('/raw-query',userCtrl.rawQuery);
 
 app.listen(port,()=>{
     console.log(`App is listening at http://localhost:${port}`)

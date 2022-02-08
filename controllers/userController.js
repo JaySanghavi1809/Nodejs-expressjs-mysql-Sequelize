@@ -1,7 +1,10 @@
 var db = require("../models");
 const users = require("../models/users");
 const Users = db.users;
-const { Sequelize, Op, QueryTypes} = require("sequelize");
+const Posts = db.posts;
+const Tags = db.tags;
+const { Sequelize, Op, QueryTypes } = require("sequelize");
+const { posts } = require("../models");
 var addUser = async (req, resp) => {
   //Insert Data Methods:
   // --------------------------------
@@ -76,10 +79,10 @@ var crudOperation = async (req, resp) => {
   // let data = await Users.findAll({})
 
   //findOne
-  //let data = await Users.findOne({});
+  // let data = await Users.findOne({});
 
   let response = {
-    data: 'ok',
+    data: data
   };
   resp.status(200).json(response);
 };
@@ -88,8 +91,6 @@ var queryData = async (req, res) => {
   // let datas = await Users.create({name:'mit Singh',email:'mite@gmail.com',gender:'male'},{
   //   fields:['email','gender']
   // });
-
-  
 
   //SELECT DATA Query:
   // -----------------------------
@@ -101,7 +102,7 @@ var queryData = async (req, res) => {
   //     ['email','EmailID'],//Rename
   //     'gender',
   //     [Sequelize.fn('Count',Sequelize.col('email')),'emailCount'], //count
-  //     [Sequelize.fn('CONCAT',Sequelize.col('email'), ' ID'),'emailCount'] //CONCAT
+  //     [Sequelize.fn('CONCAT',Sequelize.col('email'), ' ID'),'emailaddress'] //CONCAT
 
   //   ]
   // });
@@ -172,23 +173,20 @@ var queryData = async (req, res) => {
     limit:2,
     offset:1 //skip record
   });
- 
 
   //simple display total count:
-  //let data = await Users.count({ });
-
+  // let data = await Users.count({ });
 
   let response = {
-    data: data
+    data: data,
   };
   res.status(200).json(response);
 };
 
-var finderData = async (req,res)=>{
-
+var finderData = async (req, res) => {
   // let data = await Users.findAll({});
   // let data = await Users.findOne({});
-  let data = await Users.findByPk(5)
+  let datas = await Users.findByPk(5);
 
   // let data = await Users.findAndCountAll({
   //   where:{
@@ -196,39 +194,42 @@ var finderData = async (req,res)=>{
   //   }
   // })
 
-  /* let [data, created] = await Users.findOrCreate({
-    where:{name:'dummy2'},
-    defaults:{
-      email:'dummy2@gmail.com',
-      gender:'male'
-    }
+  let [data, created] = await Users.findOrCreate({
+    where: { name: "dummy2" },
+    defaults: {
+      email: "dummy2@gmail.com",
+      gender: "male",
+    },
   });
 
   let response = {
-    data:data,
-    add:created
-  } */
+    data: datas,
+    add: created,
+  };
   // let data = await Users.findAll({});
   // let data = await Users.create({name:'mahesh',email:'mahesh@gmail.com',gender:'male'})
-  res.status(200).json(response)
-}
+  res.status(200).json(response);
+};
 
-var setterGetter = async (req,res)=>{
+var setterGetter = async (req, res) => {
   //let data = await Users.create({name:'Test',email:'done',gender:'male'})
   let data = await Users.findAll({});
   let response = {
-    data: data
-  }
-  res.status(200).json(response)
-}
+    data: data,
+  };
+  res.status(200).json(response);
+};
 
-var validationCont = async (req,res)=>{
-  try{
-    let data = await Users.create({name:'Test',email:'test@gmail.com',gender:'male'})
-
-  }catch(e){
+var validationCont = async (req, res) => {
+  try {
+    let data = await Users.create({
+      name: "Test",
+      email: "test@gmail.com",
+      gender: "male",
+    });
+  } catch (e) {
     const messages = {};
-    e.errors.forEach((error)=>{
+    e.errors.forEach((error) => {
       let message;
       //console.log(error)
       // switch (error.validatorKey){
@@ -245,48 +246,183 @@ var validationCont = async (req,res)=>{
       //         //console.log(error.message)
       //         message = error.message;
       //         break;
-              
-            
 
       // }
-      message = error.message
-      messages[error.path]=message
+      message = error.message;
+      messages[error.path] = message;
 
-      console.log(messages)
-       
-    })
-
+      console.log(messages);
+    });
   }
   let response = {
-    data:'me'
-  }
+    data: "me",
+  };
   res.status(200).json(response);
-}
+};
 
-var rawQuery = async(req,res)=>{
+var rawQuery = async (req, res) => {
   // const users = await db.sequelize.query("Select * from users where gender = ? ",{
-    // const users = await db.sequelize.query("Select * from users where gender IN(:gender)  ",{
-      // const users = await db.sequelize.query("Select * from users where email LIKE :searchEmail  ",{
-        const users = await db.sequelize.query("Select * from users where gender = $gender ",{
-    type: QueryTypes.SELECT,
-    // model:Users,
-    // mapToModel:true,
-    // raw:true
-    //replacements:{gender:'male'}//gender =:gender
-    // replacements:['male'] // gender = ?
-    //replacements:{gender:['male','female']} //gender IN(:gender) 
-    // replacements: {searchEmail: '%gmail.com'} // email LIKE :searchEmail
-    // bind:{gender:'male'}
-
-
-  });
+  // const users = await db.sequelize.query("Select * from users where gender IN(:gender)  ",{
+  // const users = await db.sequelize.query("Select * from users where email LIKE :searchEmail  ",{
+  const users = await db.sequelize.query(
+    "Select * from users where gender = $gender ",
+    {
+      type: QueryTypes.SELECT,
+      // model:Users,
+      // mapToModel:true,
+      // raw:true
+      //replacements:{gender:'male'}//gender =:gender
+      // replacements:['male'] // gender = ?
+      //replacements:{gender:['male','female']} //gender IN(:gender)
+      // replacements: {searchEmail: '%gmail.com'} // email LIKE :searchEmail
+      // bind:{gender:'male'}
+    }
+  );
   let response = {
-    data: 'Row Query',record:users
-  }
-  res.status(200).json(response)
-}
+    data: "Row Query",
+    record: users,
+  };
+  res.status(200).json(response);
+};
 
+//one to one relation both model data display:-
+// var oneToOne = async(req,res)=>{
+//   let data = await Users.findAll({
+//     include:Posts,
+//     where:{id:4}
+//   })
 
+//   res.status(200).json(data)
+// }
+
+//Both model specific columns display in one to one relations
+// var oneToOne = async(req,res)=>{
+//   let data = await Users.findAll({
+//     attributes:['name','email'],
+//     include:[{
+//       model:posts,
+//       attributes:['title',['name','PostName']]
+//     }],
+//     where:{id:4}
+//   })
+
+//   res.status(200).json(data)
+// }
+
+//user to posts
+var oneToOne = async (req, res) => {
+  let data = await Users.findAll({
+    attributes: ["name", "email"],
+    include: [
+      {
+        model: posts,
+        as: "postDetails", //alise name
+        attributes: ["title", ["name", "PostName"]],
+      },
+    ],
+    where: { id: 4 },
+  });
+
+  res.status(200).json(data);
+};
+
+var belongsTo = async (req, res) => {
+  let data = await posts.findAll({
+    attributes: ["content", "title"],
+    include: [
+      {
+        model: Users,
+        as: "userInfo",
+        attributes: ["name", "email"],
+      },
+    ],
+  });
+  res.status(200).json(data);
+};
+
+var oneToMany = async (req, res) => {
+  let data = await Users.findAll({
+    attributes: ["name", "email"],
+    include: [
+      {
+        model: posts,
+        as: "postDetails",
+        attributes: ["title", ["name", "PostName"]],
+      },
+    ],
+    //where: { id: 4 },
+  });
+
+  res.status(200).json(data);
+};
+
+var manyToMany = async (req, res) => {
+  //---------- post to Tag -----------//
+  // let data = await Posts.findAll({
+  //   attributes:['title','content'],
+  //   include:[{
+  //     model:Tags,
+  //     attributes:['name']
+  //   }]
+
+  // });
+
+  //------------- Tag to Post ------------------//
+  let data = await Tags.findAll({
+    attributes: ["name"],
+    include: [
+      {
+        model: Posts,
+        attributes: ["title"],
+      },
+    ],
+  });
+
+  res.status(200).json(data);
+};
+
+//------------- Scope -------------//
+var scopes = async (req, res) => {
+  // let data = await Users.scope(['checkStatus','checkGender']).findAll({})
+  // let data = await Posts.findAll({
+  //   include:[{
+  //     model:Users, as: 'userInfo'
+  //   }]
+  // })
+
+  let data = await Users.scope([
+    "includePost",
+    "selectusers",
+    "limitCheck",
+  ]).findAll({});
+  res.status(200).json(data);
+};
+
+var loading = async (req, res) => {
+  //------- Lazy Loading ------------ //
+  // let data = await Users.findOne({where:{id:4}});
+  // let postData = await data.getPosts();
+  // let response = {
+  //   users:data,
+  //   posts:postData
+  // }
+
+  //-------- Eager Loading ----------- //
+  let data = await Users.findOne({
+    include:[{
+      required:true,
+      model:Posts,
+      attributes:['name']
+    }],
+    where: { id: 4 }
+  })
+
+  let response = {
+    users: data,
+    //posts:postData
+  };
+  res.status(200).json(response);
+};
 
 module.exports = {
   addUser,
@@ -295,6 +431,11 @@ module.exports = {
   finderData,
   setterGetter,
   validationCont,
-  rawQuery
+  rawQuery,
+  oneToOne,
+  belongsTo,
+  oneToMany,
+  manyToMany,
+  scopes,
+  loading,
 };
-

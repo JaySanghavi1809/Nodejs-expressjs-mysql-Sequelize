@@ -3,8 +3,16 @@ const users = require("../models/users");
 const Users = db.users;
 const Posts = db.posts;
 const Tags = db.tags;
-const { Sequelize, Op, QueryTypes } = require("sequelize");
-const { posts } = require("../models");
+
+const Image = db.image;
+const Comment = db.comment;
+const Video = db.video;
+const Employee = db.employee;
+
+
+const { Sequelize, Op, QueryTypes, DataTypes } = require("sequelize");
+const { posts, sequelize } = require("../models");
+const video = require("../models/video");
 var addUser = async (req, resp) => {
   //Insert Data Methods:
   // --------------------------------
@@ -82,7 +90,7 @@ var crudOperation = async (req, resp) => {
   // let data = await Users.findOne({});
 
   let response = {
-    data: data
+    data: "ok",
   };
   resp.status(200).json(response);
 };
@@ -156,23 +164,23 @@ var queryData = async (req, res) => {
   // });
 
   //3. Greter then and orderBy,group by:
-   let data = await Users.findAll({
-    where:{
-     id:{
-       [Op.gt]:2
-     },
-     email:{
-       [Op.like]:'%@gmail.com%'
-     }
-    },
-    order:[
-      ['name','DESC'],
-      // ['email','DESC']
-    ],
-    group:['email','name'],
-    limit:2,
-    offset:1 //skip record
-  });
+  //  let data = await Users.findAll({
+  //   where:{
+  //    id:{
+  //      [Op.gt]:2
+  //    },
+  //    email:{
+  //      [Op.like]:'%@gmail.com%'
+  //    }
+  //   },
+  //   order:[
+  //     ['name','DESC'],
+  //     // ['email','DESC']
+  //   ],
+  //   group:['email','name'],
+  //   limit:2,
+  //   offset:1 //skip record
+  // });
 
   //simple display total count:
   // let data = await Users.count({ });
@@ -409,13 +417,15 @@ var loading = async (req, res) => {
 
   //-------- Eager Loading ----------- //
   let data = await Users.findOne({
-    include:[{
-      required:true,
-      model:Posts,
-      attributes:['name']
-    }],
-    where: { id: 4 }
-  })
+    include: [
+      {
+        required: true,
+        model: Posts,
+        attributes: ["name"],
+      },
+    ],
+    where: { id: 4 },
+  });
 
   let response = {
     users: data,
@@ -423,6 +433,144 @@ var loading = async (req, res) => {
   };
   res.status(200).json(response);
 };
+
+var polymorphic = async (req, res) => {
+  //--------- Get all data image to comment ----------
+  //  let datas = await Image.findAll({
+  //   include:[{
+  //     model:Comment
+  //   }]
+  // }) 
+
+  //--------- Get All data Video to comment --------
+    // let datas = await Video.findAll({
+    //   include:[{
+    //     model:Comment
+    //   }]
+    // })
+
+  //--- Comment to video/image ----//
+  // let datas = await Comment.findAll({
+  //     include:[Image]
+
+  // });  
+
+//   let data = await Comment.findAll({
+//     include:[Video]
+
+// });  
+  res.status(200).json(datas);
+};
+
+var polymorphicmany = async (req,res)=>{
+  //let data = "Many-to-Many Polymorphic Associations"; //Tag_Taggable
+  //------ IMAGE TO TAG ----------
+  // let data = await Image.findAll({
+  //   include:[Tags]
+  // })
+
+   //------ VIDEO TO TAG ----------
+  //  let data = await Video.findAll({
+  //   include:[Tags]
+  // })
+
+   //------ TAG TO VIDEO ----------
+   let data = await Tags.findAll({
+    include:[Video,Image]
+  })
+
+  res.status(200).json(data)
+}
+
+var paranoid = async(req,res)=>{
+  //let data = await Employee.findAll({})
+  //--------- deleted---------------
+  // let data = await Employee.destroy({
+  //   where:{
+  //     id:2
+  //   }
+  // })
+
+  //-------- data with softDelete  //paranoid
+  // let data = await Employee.findAll({
+  //   where:{
+  //     id:{
+  //       [Op.gt]:0
+  //     }
+  //   },
+    
+  // })  
+
+  //------------- Restored --------------
+  let data = await Employee.restore({
+    where:{
+      id:2
+    }
+  })
+  res.status(200).json(data)
+}
+ 
+var transactions = async (req,res)=>{
+  // let data = 'Transactions'
+  const t = await sequelize.transaction();
+ /*  try{
+
+    const user = await Users.create({name:'Mitesh',email:'mitesh0707@gmail.com',gender:'male'},{
+      transactions:t
+    });
+    console.log("commit")
+    t.commit();
+  }catch(e){
+    console.log("rollback")
+    t.rollback();
+
+  } */
+  let data = await Users.findAll({})
+  transaction:t
+  lock:true
+  res.status(200).json(data)
+}
+
+var hooks = async(req,res)=>{
+  let data = await Users.create({name:'last data',email:'follow7@gmail.com',gender:'male'})
+  res.status(200).json(data)
+}
+
+const queryInterface = sequelize.getQueryInterface();
+var queryInterfaceData = async (req,res)=>{
+  
+  
+  // queryInterface.createTable('avon',{
+  //   name:DataTypes.STRING
+  // });
+
+  //-- column add
+  // queryInterface.addColumn('avon','email',{
+  //   type:DataTypes.STRING
+  // })
+
+  //-- Alter
+  // queryInterface.changeColumn('avon','email',{
+  //   type:DataTypes.STRING,
+  //   defaultValue:'test@gmail.com'
+  // });
+
+  //--- COLUMN DELETE
+  // queryInterface.removeColumn('avon','email')
+
+  //------ delete table
+  queryInterface.dropTable('avon')
+
+  let data = "Query Interface"
+  res.status(200).json(data)
+}
+
+
+
+
+
+
+
 
 module.exports = {
   addUser,
@@ -438,4 +586,11 @@ module.exports = {
   manyToMany,
   scopes,
   loading,
+  polymorphic,
+  polymorphicmany,
+  paranoid,
+  transactions,
+  hooks,
+  queryInterfaceData,
+  
 };

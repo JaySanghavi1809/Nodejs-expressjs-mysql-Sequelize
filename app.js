@@ -34,6 +34,23 @@ app.get("/scopes", userCtrl.scopes);
 
 app.get('/loading',userCtrl.loading)
 
+app.get('/polymorphic',userCtrl.polymorphic)
+
+app.get('/polymorphic-many',userCtrl.polymorphicmany)
+
+app.get('/paranoid',userCtrl.paranoid)
+
+app.get('/transactions',userCtrl.transactions)
+
+app.get('/hooks',userCtrl.hooks)
+
+app.get('/query-interface',userCtrl.queryInterfaceData)
+
+
+
+
+
+
 app.listen(port, () => {
   console.log(`App is listening at http://localhost:${port}`);
 });
